@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>$id$</id>
-    <version>1.0.0.1</version>
+    <version>1.0.0.2</version>
     <title>Sino.EventBus</title>
     <authors>y-z-f</authors>
     <owners>sino</owners>
@@ -10,7 +10,7 @@
     <projectUrl>http://www.sowl.cn</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Sino EventBus事件总线</description>
-    <copyright>Copyright 2015</copyright>
+    <copyright>Copyright 2016</copyright>
     <tags>ABP Azure ServiceBus</tags>
   </metadata>
 </package>
