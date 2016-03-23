@@ -1,3 +1,5 @@
+[![Build status](https://ci.appveyor.com/api/projects/status/j160byy6e7odj9k3?svg=true)](https://ci.appveyor.com/project/yaozhenfa/eventbus)
+
 # 简介
 基于ABP框架，使ABP中的EventBus能够通过Azure ServiceBus跨越不同的网站。
 
