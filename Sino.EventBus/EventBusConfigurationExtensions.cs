@@ -14,6 +14,8 @@ namespace Sino.EventBus
 	/// </summary>
 	public static class EventBusConfigurationExtensions
 	{
+		public static IBusControl BusHub { get; set; }
+
 		/// <summary>
 		/// 服务总线连接字符串Name
 		/// </summary>
@@ -30,7 +32,7 @@ namespace Sino.EventBus
 			if (!string.IsNullOrEmpty(connectionName))
 				ConnectionName = connectionName;
 
-			var bus = Bus.Factory.CreateUsingAzureServiceBus(cfg =>
+			BusHub = Bus.Factory.CreateUsingAzureServiceBus(cfg =>
 			{
 				var host = cfg.Host(CloudConfigurationManager.GetSetting(connectionName), h =>
 				{
@@ -50,8 +52,8 @@ namespace Sino.EventBus
 			var releaseEventBus = IocManager.Instance.Resolve<IEventBus>();
 			IocManager.Instance.Release(releaseEventBus);
 
-			IocManager.Instance.IocContainer.Register(Component.For<IBus>().Instance(bus).Named("BusRegister"));
-			IocManager.Instance.IocContainer.Register(Component.For<IBusControl>().Instance(bus).Named("BusControlRegister"));
+			IocManager.Instance.IocContainer.Register(Component.For<IBus>().Instance(BusHub).Named("BusRegister"));
+			IocManager.Instance.IocContainer.Register(Component.For<IBusControl>().Instance(BusHub).Named("BusControlRegister"));
 			IocManager.Instance.IocContainer.Register(
 				Component.For<IEventBus>().
 				Instance(eventBusExtensions).
@@ -59,7 +61,12 @@ namespace Sino.EventBus
 				Named("Sino.EventBus")
 			);
 
-			bus.Start();
+			BusHub.Start();
+		}
+
+		public static void Stop()
+		{
+			BusHub.Stop();
 		}
 	}
 }
