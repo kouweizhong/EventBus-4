@@ -86,6 +86,9 @@
   <ItemGroup>
     <Compile Include="AddEventData.cs" />
     <Compile Include="AddEventHandler.cs" />
+    <Compile Include="AddRequest.cs" />
+    <Compile Include="AddRequestHandler.cs" />
+    <Compile Include="AddResponse.cs" />
     <Compile Include="DeleteEventData.cs" />
     <Compile Include="DeleteEventHandler.cs" />
     <Compile Include="EventDataModule.cs" />
