@@ -1,9 +1,8 @@
-﻿using Abp.Events.Bus;
-using System;
+﻿using System;
 
 namespace Sino.EventBus.Test
 {
-	public class DeleteEventData : EventData
+	public class DeleteEventData : RemoteEventData
 	{
 		public string Delete { get; set; }
 

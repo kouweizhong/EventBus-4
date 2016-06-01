@@ -108,7 +108,9 @@
     <Compile Include="EventBusExtensions.cs" />
     <Compile Include="EventBusModule.cs" />
     <Compile Include="IEventBusExtensions.cs" />
+    <Compile Include="IRemoteEventData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RemoteEventData.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -1,9 +1,8 @@
-﻿using Abp.Events.Bus;
-using System;
+﻿using System;
 
 namespace Sino.EventBus.Test
 {
-	public class AddEventData : EventData
+	public class AddEventData : RemoteEventData
 	{
 		public string Add { get; set; }
 

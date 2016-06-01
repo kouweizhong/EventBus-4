@@ -21,13 +21,16 @@ namespace Sino.EventBus
 
 		protected IBusControl Bus { get; set; }
 
-		public EventBusExtensions(IBusControl busControl)
+		protected IEventBus EventBus { get; set; }
+
+		public EventBusExtensions(IBusControl busControl, IEventBus oldEventBus)
 		{
 			if (busControl == null)
 				throw new ArgumentNullException(nameof(busControl));
 
 			Log = NullLogger.Instance;
 			Bus = busControl;
+			EventBus = oldEventBus;
 		}
 
 		#region Trigger
@@ -39,7 +42,10 @@ namespace Sino.EventBus
 
 		public void Trigger(Type eventType, object eventSource, IEventData eventData)
 		{
-			Bus.Publish(eventData, eventType).Wait();
+			if (eventData is RemoteEventData)
+				Bus.Publish(eventData, eventType).Wait();
+			else
+				EventBus.Trigger(eventType, eventSource, eventData);
 		}
 
 		public void Trigger<TEventData>(TEventData eventData) where TEventData : IEventData
@@ -59,7 +65,10 @@ namespace Sino.EventBus
 
 		public Task TriggerAsync(Type eventType, object eventSource, IEventData eventData)
 		{
-			return Bus.Publish(eventData, eventType);
+			if (eventData is RemoteEventData)
+				return Bus.Publish(eventData, eventType);
+			else
+				return EventBus.TriggerAsync(eventType, eventSource, eventData);
 		}
 
 		public Task TriggerAsync<TEventData>(TEventData eventData) where TEventData : IEventData
@@ -69,7 +78,10 @@ namespace Sino.EventBus
 
 		public Task TriggerAsync<TEventData>(object eventSource, TEventData eventData) where TEventData : IEventData
 		{
-			return Bus.Publish(eventData, typeof(TEventData));
+			if (eventData is RemoteEventData)
+				return Bus.Publish(eventData, typeof(TEventData));
+			else
+				return EventBus.TriggerAsync(eventSource, eventData);
 		}
 
 		#endregion
@@ -78,69 +90,69 @@ namespace Sino.EventBus
 
 		public IDisposable Register(Type eventType, IEventHandlerFactory handlerFactory)
 		{
-			throw new NotImplementedException();
+			return EventBus.Register(eventType, handlerFactory);
 		}
 
 		public IDisposable Register(Type eventType, IEventHandler handler)
 		{
-			throw new NotImplementedException();
+			return EventBus.Register(eventType, handler);
 		}
 
 		public IDisposable Register<TEventData>(IEventHandlerFactory handlerFactory) where TEventData : IEventData
 		{
-			throw new NotImplementedException();
+			return EventBus.Register<TEventData>(handlerFactory);
 		}
 
 		public IDisposable Register<TEventData>(IEventHandler<TEventData> handler) where TEventData : IEventData
 		{
-			throw new NotImplementedException();
+			return EventBus.Register<TEventData>(handler);
 		}
 
 		public IDisposable Register<TEventData>(Action<TEventData> action) where TEventData : IEventData
 		{
-			throw new NotImplementedException();
+			return EventBus.Register<TEventData>(action);
 		}
 
 		public IDisposable Register<TEventData, THandler>()
 			where TEventData : IEventData
 			where THandler : IEventHandler<TEventData>, new()
 		{
-			throw new NotImplementedException();
+			return EventBus.Register<TEventData, THandler>();
 		}
 
 		public void Unregister(Type eventType, IEventHandlerFactory factory)
 		{
-			throw new NotImplementedException();
+			EventBus.Unregister(eventType, factory);
 		}
 
 		public void Unregister(Type eventType, IEventHandler handler)
 		{
-			throw new NotImplementedException();
+			EventBus.Unregister(eventType, handler);
 		}
 
 		public void Unregister<TEventData>(IEventHandlerFactory factory) where TEventData : IEventData
 		{
-			throw new NotImplementedException();
+			EventBus.Unregister<TEventData>(factory);
 		}
 
 		public void Unregister<TEventData>(IEventHandler<TEventData> handler) where TEventData : IEventData
 		{
-			throw new NotImplementedException();
+			EventBus.Unregister<TEventData>(handler);
 		}
 
 		public void Unregister<TEventData>(Action<TEventData> action) where TEventData : IEventData
 		{
-			throw new NotImplementedException();
+			EventBus.Unregister<TEventData>(action);
 		}
 
 		public void UnregisterAll(Type eventType)
 		{
-			throw new NotImplementedException();
+			EventBus.UnregisterAll(eventType);
 		}
 
 		public void UnregisterAll<TEventData>() where TEventData : IEventData
 		{
-			throw new NotImplementedException();
+			EventBus.UnregisterAll<TEventData>();
 		}
 
 		#endregion

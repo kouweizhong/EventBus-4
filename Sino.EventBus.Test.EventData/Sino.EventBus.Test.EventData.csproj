@@ -101,6 +101,12 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Sino.EventBus\Sino.EventBus.csproj">
+      <Project>{F31A1AB7-7C47-4468-8999-1EA28547B2AC}</Project>
+      <Name>Sino.EventBus</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
