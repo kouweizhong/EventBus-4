@@ -5,6 +5,7 @@ using Abp.Events.Bus.Factories;
 using Abp.Events.Bus.Handlers;
 using Abp.Dependency;
 using Castle.Core.Logging;
+using MassTransit;
 
 namespace Sino.EventBus
 {
@@ -14,49 +15,22 @@ namespace Sino.EventBus
 	public class EventBusExtensions : IEventBusExtensions, ISingletonDependency
 	{
 		/// <summary>
-		/// Abp自带EventBus，用来降级时使用
-		/// </summary>
-		protected IEventBus EventBus { get; set; }
-
-		/// <summary>
-		/// 事件发布
-		/// </summary>
-		protected IEventPublish EventPublish { get; set; }
-
-		/// <summary>
-		/// 事件订阅
-		/// </summary>
-		protected IEventSubscribe EventSubscribe { get; set; }
-
-		/// <summary>
 		/// 日志
 		/// </summary>
 		protected ILogger Log { get; set; }
 
-		public EventBusExtensions(IEventBus eventBus, IEventPublish eventPublish, IEventSubscribe eventSubscribe)
+		protected IBusControl Bus { get; set; }
+
+		protected IEventBus EventBus { get; set; }
+
+		public EventBusExtensions(IBusControl busControl, IEventBus oldEventBus)
 		{
-			if (eventBus == null)
-				throw new ArgumentNullException("eventBus");
-			if (eventPublish == null)
-				throw new ArgumentNullException("eventPublish");
-			if (eventSubscribe == null)
-				throw new ArgumentNullException("EventSubscribe");
+			if (busControl == null)
+				throw new ArgumentNullException(nameof(busControl));
 
 			Log = NullLogger.Instance;
-			EventBus = eventBus;
-			EventPublish = eventPublish;
-			EventSubscribe = eventSubscribe;
-		}
-
-		public virtual void Start()
-		{
-			if (string.IsNullOrEmpty(EventBusConfigurationExtensions.ConnectionName))
-			{
-				throw new ArgumentNullException("ConnectionName");
-			}
-
-			EventPublish.Connect(EventBusConfigurationExtensions.ConnectionName);
-			EventSubscribe.Connect(EventBusConfigurationExtensions.ConnectionName);
+			Bus = busControl;
+			EventBus = oldEventBus;
 		}
 
 		#region Trigger
@@ -68,7 +42,10 @@ namespace Sino.EventBus
 
 		public void Trigger(Type eventType, object eventSource, IEventData eventData)
 		{
-			EventPublish.Trigger(eventType, eventSource, eventData);
+			if (eventData is RemoteEventData)
+				Bus.Publish(eventData, eventType).Wait();
+			else
+				EventBus.Trigger(eventType, eventSource, eventData);
 		}
 
 		public void Trigger<TEventData>(TEventData eventData) where TEventData : IEventData
@@ -88,7 +65,10 @@ namespace Sino.EventBus
 
 		public Task TriggerAsync(Type eventType, object eventSource, IEventData eventData)
 		{
-			return EventPublish.TriggerAsync(eventType, eventSource, eventData);
+			if (eventData is RemoteEventData)
+				return Bus.Publish(eventData, eventType);
+			else
+				return EventBus.TriggerAsync(eventType, eventSource, eventData);
 		}
 
 		public Task TriggerAsync<TEventData>(TEventData eventData) where TEventData : IEventData
@@ -98,7 +78,10 @@ namespace Sino.EventBus
 
 		public Task TriggerAsync<TEventData>(object eventSource, TEventData eventData) where TEventData : IEventData
 		{
-			return EventPublish.TriggerAsync(eventSource, eventData);
+			if (eventData is RemoteEventData)
+				return Bus.Publish(eventData, typeof(TEventData));
+			else
+				return EventBus.TriggerAsync(eventSource, eventData);
 		}
 
 		#endregion
@@ -122,12 +105,12 @@ namespace Sino.EventBus
 
 		public IDisposable Register<TEventData>(IEventHandler<TEventData> handler) where TEventData : IEventData
 		{
-			return EventBus.Register(handler);
+			return EventBus.Register<TEventData>(handler);
 		}
 
 		public IDisposable Register<TEventData>(Action<TEventData> action) where TEventData : IEventData
 		{
-			return EventBus.Register(action);
+			return EventBus.Register<TEventData>(action);
 		}
 
 		public IDisposable Register<TEventData, THandler>()
@@ -154,12 +137,12 @@ namespace Sino.EventBus
 
 		public void Unregister<TEventData>(IEventHandler<TEventData> handler) where TEventData : IEventData
 		{
-			EventBus.Unregister(handler);
+			EventBus.Unregister<TEventData>(handler);
 		}
 
 		public void Unregister<TEventData>(Action<TEventData> action) where TEventData : IEventData
 		{
-			EventBus.Unregister(action);
+			EventBus.Unregister<TEventData>(action);
 		}
 
 		public void UnregisterAll(Type eventType)
